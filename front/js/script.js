@@ -2,7 +2,7 @@
 /* ----- RECUPERATION DES DONNEES DE L'API ET AFFICHAGE SUR LA PAGE INDEX ----- */
 /* ---------------------------------------------------------------------------- */
 
-class product {
+/*class product {
     constructor(altTxt, colors, description, imageUrl, name, price, _id) { 
         this.altTxt = altTxt;
         this.colors = colors;
@@ -12,7 +12,7 @@ class product {
         this.price = price;
         this._id = _id;
     }
-}
+}*/
 
 const productsSection = document.getElementById("items");
 
@@ -51,7 +51,7 @@ fetch("http://localhost:3000/api/products")
             document.querySelectorAll("#items a > article > img")[i].setAttribute("src", value[i].imageUrl); 
             document.querySelectorAll("#items a > article > img")[i].setAttribute("alt", value[i].altTxt); 
 
-            console.log(value[i]._id);
+            /*console.log(value[i]._id);*/
         }
 
     })
@@ -61,16 +61,20 @@ fetch("http://localhost:3000/api/products")
 
 
 /* ---------------------------------------------------- */
-/* ----- CONFIGURATION DES URLs DES PAGES PRODUITS ----- */
+/* ----- CONFIGURATION DES URLs DES PAGES PRODUITS ---- */
 /* ---------------------------------------------------- */
 
-const mainUrl = "http://localhost:3000/api/product/_id"; 
-
-const newUrl = new URL(mainUrl);
-
-let urlParamId = newUrl.URLSearchParams.get("_id");
-
-console.log("urlParamId");
-
-
-
+fetch("http://localhost:3000/api/products")
+    .then(function(res) {
+        if(res.ok) {
+            return res.json(); // Vérification de la promesse.
+        }
+    })
+    .then(function(value) {
+        for(let i in value) {
+            document.querySelectorAll("#items a")[i].setAttribute("href", "./product.html?id=" + value[i]._id);
+        } // Ajout des id produits dans les href
+    })
+    .catch(function(err) {
+        console.error(err);
+    });
