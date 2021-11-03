@@ -53,28 +53,35 @@ const select = document.getElementById("colors");
 
 const itemQty = document.getElementById("quantity");
 
-/*select.addEventListener("change", function() {
-    const selectedColor = select.options[select.selectedIndex].text;
-    console.log(selectedColor);
-    return selectedColor;
-})
-
-itemQty.addEventListener("focusout", function() {
-    const itemQtyValue = itemQty.value;
-    console.log(itemQtyValue);
-    return itemQty.value; // RETURN AVEC FONCTION CONST OU LET
-})*/
-
 const addToCartButton = document.getElementById("addToCart");
 
+class product {
+    constructor (id, qty, color) {
+        this.id = id;
+        this.qty = qty;
+        this.color = color;
+    }
+}
 
 addToCartButton.addEventListener("click", function() {
     if(itemQty.value>0 && itemQty.value<101) {
-        localStorage.setItem("storedId", urlId);
-        localStorage.setItem("storedQty", itemQty.value);
-        localStorage.setItem("storedColor", select.options[select.selectedIndex].text);
-    
+
+        let storedProduct = new product (urlId, itemQty.value, select.options[select.selectedIndex].text);
+
+        localStorage.setItem("storedProduct" + localStorage.length, JSON.stringify(storedProduct));
+
         addToCartButton.textContent = "Produit(s) ajouté(s) !";
+
+        /*for(let i in localStorage) {
+
+            let thisProduct = JSON.parse(localStorage.getItem("storedProduct" + i));
+
+            if(localStorage.length > 0 && urlId == thisProduct.id && select.options[select.selectedIndex].text == thisProduct.color) {
+                thisProduct.qty += itemQty.value;
+                console.log(thisProduct.qty); 
+            }
+        }*/
+
     } else {
         addToCartButton.textContent = "Quantité incorrecte !";
     }
