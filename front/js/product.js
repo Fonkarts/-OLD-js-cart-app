@@ -9,7 +9,6 @@ const productDescription = document.getElementById("description");
 
 const currentUrl = new URLSearchParams(window.location.search);
 const urlId = currentUrl.get("id"); // Recherche de l'identifiant produit dans l'URL
-console.log(urlId);
 
 fetch("http://localhost:3000/api/products/" + urlId) // Cible le produit correspondant à l'ID 
     .then(function(res) {                              // récupéré dans l'URL.
@@ -18,7 +17,6 @@ fetch("http://localhost:3000/api/products/" + urlId) // Cible le produit corresp
         }
     })
     .then(function(value) {
-        console.log(value.price); // test
         productImage.setAttribute("src", value.imageUrl);
         productImage.setAttribute("alt", value.altTxt); // Attribution des infos produit
         productName.textContent = value.name;
@@ -37,7 +35,6 @@ fetch("http://localhost:3000/api/products/" + urlId) // Cible le produit corresp
 
         for(let i=0; i< value.colors.length; i++) { // Intégration des couleurs dans les <option>
             document.querySelectorAll("option")[i].textContent = value.colors[i];
-            console.log(value.colors[i]); // test
         }
     })
     .catch(function(err) {
@@ -63,7 +60,7 @@ class product {
     }
 }
 
-addToCartButton.addEventListener("click", function() {
+addToCartButton.addEventListener("click", function(e) {
     if(itemQty.value>0 && itemQty.value<101) {
 
         let storedProduct = new product (urlId, itemQty.value, select.options[select.selectedIndex].text);
@@ -72,17 +69,29 @@ addToCartButton.addEventListener("click", function() {
 
         addToCartButton.textContent = "Produit(s) ajouté(s) !";
 
-        /*for(let i in localStorage) {
+        for(let i=0; i<(localStorage.length-1); i++) {
 
             let thisProduct = JSON.parse(localStorage.getItem("storedProduct" + i));
+            let sameId = thisProduct.id == urlId;
+            let sameColor = thisProduct.color == select.options[select.selectedIndex].text;
 
-            if(localStorage.length > 0 && urlId == thisProduct.id && select.options[select.selectedIndex].text == thisProduct.color) {
-                thisProduct.qty += itemQty.value;
-                console.log(thisProduct.qty); 
+            if(sameId && sameColor) { // CONDITION VALIDEE !!!
+ 
+                JSON.parse(localStorage.getItem(thisProduct));
+
+                let initialQty = parseInt(thisProduct.qty);
+                let updatedQty = initialQty + parseInt(itemQty.value);
+                let updatedProduct = new product (thisProduct.id, updatedQty, thisProduct.color);
+
+                localStorage.setItem("storedProduct" + i, JSON.stringify(updatedProduct));
+
+                console.log(updatedProduct);
+
+                localStorage.removeItem("storedProduct" + ((localStorage.length)-1));
             }
-        }*/
-
+        }
     } else {
         addToCartButton.textContent = "Quantité incorrecte !";
     }
 });
+
