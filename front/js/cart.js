@@ -1,10 +1,8 @@
-/* --------------------------------------------------------------- */
-/* ----- RECUPERATION INFOS LOCAL STORAGE ET AFFICHAGE PANIER ---- */
-/* --------------------------------------------------------------- */
+/* ------------------------------------------------------------------- */
+/* ----- RECUPERATION INFOS LOCAL STORAGE/API ET AFFICHAGE PANIER ---- */
+/* ------------------------------------------------------------------- */
 
 const cartTotalQty = document.getElementById("totalQuantity");
-const deleteButton = document.querySelector(".deleteItem");
-
 
 if(localStorage.length == 0) {
     document.querySelector("#cart__items > article").textContent = "Votre panier est vide !";
@@ -21,15 +19,14 @@ let totalQtySum = 0;
 let totalPriceSum = 0;
 
 for(let i=0; i<localStorage.length; i++) {
-    let thisProduct = JSON.parse(localStorage.getItem("storedProduct" + i));
+    let thisProduct = JSON.parse(localStorage.getItem(localStorage.key(i)));
     totalQtySum += parseInt(thisProduct.qty); 
 }
 cartTotalQty.textContent = totalQtySum;
 
-
 for(let i=0; i<localStorage.length; i++) { 
 
-    let storedProduct = JSON.parse(localStorage.getItem("storedProduct" + i));
+    let storedProduct = JSON.parse(localStorage.getItem(localStorage.key(i)));
     // Envoi de requêtes GET uniquement pour les produits de l'API stockés dans le localStorage (via ID)
     fetch("http://localhost:3000/api/products/" + storedProduct.id)
         .then(function(res) {
@@ -45,7 +42,6 @@ for(let i=0; i<localStorage.length; i++) {
 
             const thisQty = document.querySelectorAll(".itemQuantity")[i];
 
-
             cartImage.setAttribute("src", value.imageUrl); // Attribution des informations Produits
             cartImage.setAttribute("alt", value.altTxt); // depuis l'API et le localStorage
             cartName.textContent = value.name + ", " + storedProduct.color;
@@ -53,7 +49,6 @@ for(let i=0; i<localStorage.length; i++) {
             cartQty.setAttribute("value", storedProduct.qty);
             totalPriceSum += parseFloat(storedProduct.qty*value.price);
             document.getElementById("totalPrice").textContent = totalPriceSum + ",00";
-
 
             thisQty.addEventListener("change", function() { 
             // Ecoute changement de quantités de chaque produit et recalcule quantités et prix totaux
@@ -66,25 +61,25 @@ for(let i=0; i<localStorage.length; i++) {
                 
                 totalPriceSum += value.price*storedProduct.qty;
                 document.getElementById("totalPrice").textContent = totalPriceSum + ",00";
-
             })
-
         })
         .catch(function(err) {
             console.error(err); // Récupération des erreurs
         });
 }
-/*deleteButton.addEventListener("click", () => {
-    
-    document.querySelector(".cart__item").textContent = "Votre panier est vide !";
-    
-    localStorage.clear();
-    cartImage.setAttribute("src", ("../../back/images/kanap01.jpeg"));
-    cartName.textContent = "Nom du Produit";
-    cartPrice.textContent = "0,00 €"; // (Qté:42, Price:42€, etc.)
-    cartQty.setAttribute("value", "0");
-    cartTotalQty.textContent = "0";
-    document.getElementById("totalPrice").textContent = "0,00 €";
-});*/
 
+for(let i=0; i<localStorage.length; i++) {
 
+    let thisDelButton = document.querySelectorAll(".deleteItem")[i];
+
+    thisDelButton.addEventListener("click", () => {
+    
+        localStorage.getItem(localStorage.key(i));
+        localStorage.removeItem(localStorage.key(i));
+
+        const thisArticle = thisDelButton.closest("article");
+        thisArticle.remove();
+
+        location.reload();
+    });
+}

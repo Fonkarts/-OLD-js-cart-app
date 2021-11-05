@@ -41,7 +41,6 @@ fetch("http://localhost:3000/api/products/" + urlId) // Cible le produit corresp
         console.error(err); // Récupération des erreurs
     });
 
-
 /* ------------------------------------------------------------------------------------------- */
 /* ----- ECOUTE CHOIX COULEUR, QUANTITE, CLICK DU BOUTON PANIER ET STOCKAGE LOCAL STORAGE ---- */
 /* ------------------------------------------------------------------------------------------- */
@@ -94,4 +93,3 @@ addToCartButton.addEventListener("click", function(e) {
         addToCartButton.textContent = "Quantité incorrecte !";
     }
 });
-
