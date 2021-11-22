@@ -2,6 +2,12 @@
 /* ----- RECUPERATION DES DONNEES DE L'API ET AFFICHAGE SUR LA PAGE INDEX ----- */
 /* ---------------------------------------------------------------------------- */
 
+
+if(localStorage.length == 0) {
+    let createProductsArray = new Array;
+    localStorage.setItem("storedProducts", JSON.stringify(createProductsArray));
+}
+
 const productsSection = document.getElementById("items");
 
 const productName = document.querySelector("#items a > article > h3");
@@ -15,8 +21,6 @@ fetch("http://localhost:3000/api/products")
         }
     })
     .then(function(value) {
-        console.log(value); // Visualisation des informations.
-    
         for(let i=1; i<value.length; i++) { // Commence à 1 car la première carte existait déjà
             let productCardModel = document.querySelector("#items > a").cloneNode(true); 
             productsSection.appendChild(productCardModel); // Création d'une "carte produit" supplémentaire pour chaque produit contenu dans l'API.

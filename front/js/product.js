@@ -62,31 +62,29 @@ class product {
 addToCartButton.addEventListener("click", function(e) {
     if(itemQty.value>0 && itemQty.value<101) {
 
+        let storedProducts = JSON.parse(localStorage.getItem("storedProducts"));
+
         let storedProduct = new product (urlId, itemQty.value, select.options[select.selectedIndex].text);
 
-        localStorage.setItem("storedProduct" + localStorage.length, JSON.stringify(storedProduct));
+        storedProducts.push(storedProduct);
+        localStorage.setItem("storedProducts", JSON.stringify(storedProducts));
 
         addToCartButton.textContent = "Produit(s) ajouté(s) !";
+        
+        for(let i=0; i<(storedProducts.length-1); i++) {
 
-        for(let i=0; i<(localStorage.length-1); i++) {
-
-            let thisProduct = JSON.parse(localStorage.getItem("storedProduct" + i));
-            let sameId = thisProduct.id == urlId;
-            let sameColor = thisProduct.color == select.options[select.selectedIndex].text;
-
-            if(sameId && sameColor) { // CONDITION VALIDEE !!!
+            let sameId = storedProducts[i].id == urlId;
+            let sameColor = storedProducts[i].color == select.options[select.selectedIndex].text;
+        
+            if(sameId && sameColor) { // Si ID et COLOR existent déjà dans storedProducts
  
-                JSON.parse(localStorage.getItem(thisProduct));
-
-                let initialQty = parseInt(thisProduct.qty);
+                let initialQty = parseInt(storedProducts[i].qty);
                 let updatedQty = initialQty + parseInt(itemQty.value);
-                let updatedProduct = new product (thisProduct.id, updatedQty, thisProduct.color);
+                let updatedProduct = new product (storedProducts[i].id, JSON.stringify(updatedQty), storedProducts[i].color);
 
-                localStorage.setItem("storedProduct" + i, JSON.stringify(updatedProduct));
-
-                console.log(updatedProduct);
-
-                localStorage.removeItem("storedProduct" + ((localStorage.length)-1));
+                storedProducts[i] = updatedProduct;                
+                storedProducts.pop();
+                localStorage.setItem("storedProducts", JSON.stringify(storedProducts));
             }
         }
     } else {
