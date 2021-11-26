@@ -2,7 +2,6 @@
 /* ----- RECUPERATION INFOS LOCAL STORAGE/API ET AFFICHAGE PANIER ---- */
 /* ------------------------------------------------------------------- */
 
-
 class product {
     constructor (id, qty, color) {
         this.id = id;
@@ -16,29 +15,28 @@ let storedProducts = JSON.parse(localStorage.getItem("storedProducts"));
 if(storedProducts.length == 0) {
     document.querySelector("#cart__items > article").textContent = "Votre panier est vide !";
 } else {
-    let n=1; // Création d'articles supplémentaires selon le nombre de produits sélectionnés
+    let n=1; 
     while(n < storedProducts.length) {
         const cartItem = document.querySelector("#cart__items > article").cloneNode(true);
         document.getElementById("cart__items").appendChild(cartItem);
         n++;
+        // Création d'articles supplémentaires selon le nombre de produits sélectionnés (article pré-existant dans HTML conservé, d'où n=1)
     }
 }
-
-
 
 const cartTotalQty = document.getElementById("totalQuantity");
 let totalQtySum = 0;
 let totalPriceSum = 0;
 
 for(let i=0; i<storedProducts.length; i++) {
-    totalQtySum += parseInt(storedProducts[i].qty); 
+    totalQtySum += parseInt(storedProducts[i].qty); // Calcul de la qté totale de produits
 }
 cartTotalQty.textContent = totalQtySum;
 
 for(let i=0; i<storedProducts.length; i++) { 
     
-    // Envoi de requêtes GET uniquement pour les produits de l'API stockés dans le localStorage (via ID)
     fetch("http://localhost:3000/api/products/" + storedProducts[i].id)
+    // Envoi de requêtes GET uniquement pour les produits de l'API stockés dans le localStorage (via ID)
         .then(function(res) {
             if(res.ok) {
                 return res.json(); // Vérification du résultat
@@ -55,46 +53,44 @@ for(let i=0; i<storedProducts.length; i++) {
             cartName.textContent = value.name + ", " + storedProducts[i].color;
             cartPrice.textContent = value.price + "€";
             cartQty.setAttribute("value", storedProducts[i].qty);
-            totalPriceSum += parseFloat(storedProducts[i].qty*value.price);
+            totalPriceSum += parseFloat(storedProducts[i].qty*value.price); // Calcul du prix total
             document.getElementById("totalPrice").textContent = totalPriceSum + ",00";
 
             // Ecoute changement de quantités de chaque produit, recalcule quantités et prix totaux
             cartQty.addEventListener("change", function() { 
-                totalQtySum -= parseInt(storedProducts[i].qty);
-                totalPriceSum -= value.price*storedProducts[i].qty;
+                totalQtySum -= parseInt(storedProducts[i].qty); // Retrait de la qté du produit
+                totalPriceSum -= value.price*storedProducts[i].qty; // Retrait du prix du produit, selon qté
 
-                storedProducts[i].qty = cartQty.value;
+                storedProducts[i].qty = cartQty.value; // Définition nouvelle qté
                 let updatedProduct = new product (storedProducts[i].id, storedProducts[i].qty, storedProducts[i].color);
                 storedProducts[i] = updatedProduct;
-                localStorage.setItem("storedProducts", JSON.stringify(storedProducts));
+                localStorage.setItem("storedProducts", JSON.stringify(storedProducts)); // MàJ localStorage
 
-                totalQtySum += parseInt(storedProducts[i].qty);
+                totalQtySum += parseInt(storedProducts[i].qty); // MàJ qté totale
                 cartTotalQty.textContent = totalQtySum;
                 
-                totalPriceSum += value.price*storedProducts[i].qty;
+                totalPriceSum += value.price*storedProducts[i].qty; // MàJ prix total
                 document.getElementById("totalPrice").textContent = totalPriceSum + ",00";
-            })
+            });
         })
         .catch(function(err) {
-            console.error(err); // Récupération des erreurs
+            console.error(err); // Récupération et affichage des erreurs
         });
 }
 
 for(let i=0; i<storedProducts.length; i++) {
+    // Sélectionne tous les boutons "Supprimer" et écoute les clics
 
     let thisDelButton = document.querySelectorAll(".deleteItem")[i];
     let thisProduct = document.querySelectorAll(".cart__item")[i];
 
     thisDelButton.addEventListener("click", () => {
-     console.log(i);
-        if(storedProducts[i].id == thisProduct.dataset.id) {
+        if(storedProducts[i].id == thisProduct.dataset.id) { // Si le data-id correspond à un ID dans le localStorage
 
-            storedProducts.splice(i, 1)
+            storedProducts.splice(i, 1); // Supprime 1 objet du tableau "storedProducts" à partir de l'indice "i"
             localStorage.setItem("storedProducts", JSON.stringify(storedProducts));
     
-            const thisArticle = thisDelButton.closest("article");
-            thisProduct.remove();
-            location.reload();
+            location.reload(); // Raffraîchit la page afin de mettre à jour les informations
         }
     });
 }
@@ -104,15 +100,15 @@ for(let i=0; i<storedProducts.length; i++) {
 /* ----- VERIFICATION DONNEES SAISIES DANS FORMULAIRE ET CREATION OBJET CONTACT ---- */
 /* --------------------------------------------------------------------------------- */
 
-const contact = {
+const contact = { // Objet destiné à recevoir les informations du formulaire à envoyer à l'API
     firstName : "",
     lastName : "",
     address : "",
     city : "",
     email : ""
-}
+};
 
-let firstNameOk = false;
+let firstNameOk = false; // Booléens de vérification de formulaire
 let lastNameOk = false;
 let addressOk = false;
 let cityOk = false;
@@ -122,26 +118,27 @@ const form = document.querySelector(".cart__order__form");
 
 
 // VALIDATION PRENOM
-form.firstName.addEventListener("change", function() {
-    validFirstName(this);
+form.firstName.addEventListener("change", function() { // Ecoute du changement de valeur du champ
+    validFirstName(this); // Application de la fonction de validation
 });
 
 const validFirstName = function(inputFirstName) {
 
     let firstNameRegex = new RegExp("^((([A-za-zàáâãäåçèéêëìíîïðòóôõöùúûüýÿ']+[\s | -]{1}[A-za-zàáâãäåçèéêëìíîïðòóôõöùúûüýÿ']+)+)|([A-Za-zàáâãäåçèéêëìíîïðòóôõöùúûüýÿ']+))$", "g", "i");
+    // L'expression régulière à laquelle doit se conformer la valeur du champ
     let feedBackTxt = inputFirstName.nextElementSibling;
 
-    if(firstNameRegex.test(inputFirstName.value)) {
+    if(firstNameRegex.test(inputFirstName.value)) { // Si la valeur est conforme à l'expression régulière ci-dessus...
 
-        feedBackTxt.innerText = "Prénom Valide";
-        contact.firstName = form.firstName.value;
-        firstNameOk = true;
-        console.log(contact.firstName);
+        feedBackTxt.innerText = "Prénom Valide"; // ... un message de validation apparaît,
+        contact.firstName = form.firstName.value; // la valeur est stockée dans l'objet "contact",
+        firstNameOk = true; // et le booléen passe de FALSE à TRUE.
 
     } else {
-        feedBackTxt.innerText = "Prénom Invalide";
+        feedBackTxt.innerText = "Votre Prénom n'est pas valide"; // Sinon, message d'erreur
     }
-}
+    // Idem pour les autres champs du formulaire
+};
 
 // VALIDATION NOM
 form.lastName.addEventListener("change", function() {
@@ -158,12 +155,11 @@ const validLastName = function(inputLastName) {
         feedBackTxt.innerText = "Nom Valide";
         contact.lastName = form.lastName.value;
         lastNameOk = true;
-        console.log(contact.lastName);
 
     } else {
-        feedBackTxt.innerText = "Nom Invalide";
+        feedBackTxt.innerText = "Votre Nom n'est pas valide";
     }
-}
+};
 
 // VALIDATION ADRESSE
 form.address.addEventListener("change", function() {
@@ -181,12 +177,11 @@ const validAddress = function(inputAddress) {
         feedBackTxt.innerText = "Adresse Valide";
         contact.address = form.address.value;
         addressOk = true;
-        console.log(contact.address);
 
     } else {
-        feedBackTxt.innerText = "Adresse Invalide";
+        feedBackTxt.innerText = "Votre Adresse n'est pas valide";
     }
-}
+};
 
 // VALIDATION VILLE
 form.city.addEventListener("change", function() {
@@ -203,12 +198,11 @@ const validCity = function(inputCity) {
         feedBackTxt.innerText = "Ville Valide";
         contact.city = form.city.value;
         cityOk = true;
-        console.log(contact.city);
 
     } else {
-        feedBackTxt.innerText = "Ville Invalide";
+        feedBackTxt.innerText = "Votre Ville n'est pas valide";
     }
-}
+};
 
 // VALIDATION EMAIL
 form.email.addEventListener("change", function() {
@@ -225,12 +219,11 @@ const validEmail = function(inputEmail) {
         feedBackTxt.innerText = "Email Valide";
         contact.email = form.email.value;
         mailOk = true;
-        console.log(contact.email);
 
     } else {
-        feedBackTxt.innerText = "Email Invalide";
+        feedBackTxt.innerText = "Votre Email n'est pas valide";
     }
-}
+};
 
 /* -------------------------------------------------------------------------------- */
 /* ----- ECOUTE CLIC BOUTON COMMANDE, VERIFICATION ET ENVOI DONNEES ---- */
@@ -239,44 +232,44 @@ const validEmail = function(inputEmail) {
 const orderButton = document.getElementById("order");
 
 let formTest = document.querySelector(".cart__order__form");
-// formTest.setAttribute("method", "post"); ?????????????
+formTest.setAttribute("method", "post");
 
-let products = new Array;
+let products = []; // Création d'un tableau destiné à stocker les ID des produits mis au Panier
 
 for(i=0; i< storedProducts.length; i++) {
 
     const cartArticle = document.querySelectorAll(".cart__item")[i];
     cartArticle.dataset.id = storedProducts[i].id;
-    let cartArticleId = cartArticle.getAttribute("data-id");
-    products.push(cartArticleId);
+    let cartArticleId = cartArticle.getAttribute("data-id"); // Récupération des PRODUCT-ID dans l'HTML
+    products.push(cartArticleId); // Stockage dans le tableau
 }
 
-orderButton.addEventListener("click", function(e){
+orderButton.addEventListener("click", function(e){ // Ecoute au clic du bouton "Commander"
 
-    if(firstNameOk && lastNameOk && addressOk && cityOk && mailOk) {
+    if(firstNameOk && lastNameOk && addressOk && cityOk && mailOk) { // Si tous les booléens des champs du formulaire valent TRUE
 
-        e.preventDefault();
+        e.preventDefault(); // Empêche le comportement par défaut d'actualisation de page
 
-        fetch("http://localhost:3000/api/products/order", {
+        fetch("http://localhost:3000/api/products/order", { // Requête de type "POST"
             method: "POST",
             headers: {
-                "Accept": "application/json",
-                "Content-Type": "application/json"
+                "Accept": "application/json", // Demande à l'API de nous renvoyer un objet JSON
+                "Content-Type": "application/json" // Renseigne à l'API qu'elle va recevoir un objet JSON
             },
-            body: JSON.stringify({contact, products})
+            body: JSON.stringify({contact, products}) // Contenu à envoyer à l'API
         })
 
         .then(function(res) {
-            if(res.ok) {
+            if(res.ok) { // Vérification de la réponse
                 return res.json();
             }
         })
 
         .then(function(data) {
             
-            let orderId = data.orderId;
-            window.location.replace("./confirmation.html?orderId="+orderId);
-
+            let orderId = data.orderId; // Ciblage de l'orderID dans la réponse de l'API et stockage dans une variable
+            window.location.replace("./confirmation.html?orderId="+orderId); 
+            // Redirection de l'utilisateur vers la page Confirmation en passant l'orderID dans l'URL
         })
 
         .catch(function(err) {
@@ -285,7 +278,8 @@ orderButton.addEventListener("click", function(e){
         
     } else {
         e.preventDefault();
-        alert("Merci de renseigner correctement tous les champs du formulaire.");
+        alert("Merci de renseigner correctement tous les champs du formulaire."); 
+        // Si un seul booléen du formulaire vaut FALSE, alerte l'utilisateur qu'un champ n'est pas rempli correctement
     }
 });
 
