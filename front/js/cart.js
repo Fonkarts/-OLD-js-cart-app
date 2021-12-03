@@ -2,11 +2,16 @@
 /* ----- RECUPERATION INFOS LOCAL STORAGE/API ET AFFICHAGE PANIER ---- */
 /* ------------------------------------------------------------------- */
 
+
 class product {
-    constructor (id, qty, color) {
+    constructor (id, qty, color, imageUrl, altTxt, name, price) {
         this.id = id;
         this.qty = qty;
         this.color = color;
+        this.imageUrl = imageUrl;
+        this.altTxt = altTxt; 
+        this.name = name; 
+        this.price = price;
     }
 }
 
@@ -33,49 +38,46 @@ for(let i=0; i<storedProducts.length; i++) {
 }
 cartTotalQty.textContent = totalQtySum;
 
-for(let i=0; i<storedProducts.length; i++) { 
-    
-    fetch("http://localhost:3000/api/products/" + storedProducts[i].id)
-    // Envoi de requêtes GET uniquement pour les produits de l'API stockés dans le localStorage (via ID)
-        .then(function(res) {
-            if(res.ok) {
-                return res.json(); // Vérification du résultat
-            }
-        })
-        .then(function(value) {
-            const cartImage = document.querySelectorAll(".cart__item__img > img")[i];
-            const cartName = document.querySelectorAll(".cart__item__content__titlePrice > h2")[i];
-            const cartPrice = document.querySelectorAll(".cart__item__content__titlePrice > p")[i];
-            const cartQty = document.querySelectorAll(".itemQuantity")[i];
+for(let i=0; i<storedProducts.length; i++) { // REQUETE GET SUPPRIMEE
 
-            cartImage.setAttribute("src", value.imageUrl); // Attribution des informations Produits
-            cartImage.setAttribute("alt", value.altTxt); // depuis l'API et le localStorage
-            cartName.textContent = value.name + ", " + storedProducts[i].color;
-            cartPrice.textContent = value.price + "€";
-            cartQty.setAttribute("value", storedProducts[i].qty);
-            totalPriceSum += parseFloat(storedProducts[i].qty*value.price); // Calcul du prix total
-            document.getElementById("totalPrice").textContent = totalPriceSum + ",00";
+    const cartImage = document.querySelectorAll(".cart__item__img > img")[i];
+    const cartName = document.querySelectorAll(".cart__item__content__titlePrice > h2")[i];
+    const cartPrice = document.querySelectorAll(".cart__item__content__titlePrice > p")[i];
+    const cartQty = document.querySelectorAll(".itemQuantity")[i];
 
-            // Ecoute changement de quantités de chaque produit, recalcule quantités et prix totaux
-            cartQty.addEventListener("change", function() { 
-                totalQtySum -= parseInt(storedProducts[i].qty); // Retrait de la qté du produit
-                totalPriceSum -= value.price*storedProducts[i].qty; // Retrait du prix du produit, selon qté
+    cartImage.setAttribute("src", storedProducts[i].imageUrl); // Attribution des informations Produits
+    cartImage.setAttribute("alt", storedProducts[i].altTxt); // depuis l'API et le localStorage
+    cartName.textContent = storedProducts[i].name + ", " + storedProducts[i].color;
+    cartPrice.textContent = storedProducts[i].price + "€";
+    cartQty.setAttribute("value", storedProducts[i].qty);
+    totalPriceSum += parseFloat(storedProducts[i].qty*storedProducts[i].price); // Calcul du prix total
+    document.getElementById("totalPrice").textContent = totalPriceSum + ",00";
 
-                storedProducts[i].qty = cartQty.value; // Définition nouvelle qté
-                let updatedProduct = new product (storedProducts[i].id, storedProducts[i].qty, storedProducts[i].color);
-                storedProducts[i] = updatedProduct;
-                localStorage.setItem("storedProducts", JSON.stringify(storedProducts)); // MàJ localStorage
+    // Ecoute changement de quantités de chaque produit, recalcule quantités et prix totaux
+    cartQty.addEventListener("change", function() { 
+        totalQtySum -= parseInt(storedProducts[i].qty); // Retrait de la qté du produit
+        totalPriceSum -= storedProducts[i].price*storedProducts[i].qty; // Retrait du prix du produit, selon qté
 
-                totalQtySum += parseInt(storedProducts[i].qty); // MàJ qté totale
-                cartTotalQty.textContent = totalQtySum;
-                
-                totalPriceSum += value.price*storedProducts[i].qty; // MàJ prix total
-                document.getElementById("totalPrice").textContent = totalPriceSum + ",00";
-            });
-        })
-        .catch(function(err) {
-            console.error(err); // Récupération et affichage des erreurs
-        });
+        storedProducts[i].qty = cartQty.value; // Définition nouvelle qté
+        let updatedProduct = new product (
+            storedProducts[i].id,
+            storedProducts[i].qty,
+            storedProducts[i].color,
+            storedProducts[i].imageUrl,
+            storedProducts[i].altTxt,
+            storedProducts[i].name,
+            storedProducts[i].price
+            );
+
+        storedProducts[i] = updatedProduct;
+        localStorage.setItem("storedProducts", JSON.stringify(storedProducts)); // MàJ localStorage
+
+        totalQtySum += parseInt(storedProducts[i].qty); // MàJ qté totale
+        cartTotalQty.textContent = totalQtySum;
+        
+        totalPriceSum += storedProducts[i].price*storedProducts[i].qty; // MàJ prix total
+        document.getElementById("totalPrice").textContent = totalPriceSum + ",00";
+    });
 }
 
 for(let i=0; i<storedProducts.length; i++) {
@@ -94,7 +96,6 @@ for(let i=0; i<storedProducts.length; i++) {
         }
     });
 }
-
 
 /* --------------------------------------------------------------------------------- */
 /* ----- VERIFICATION DONNEES SAISIES DANS FORMULAIRE ET CREATION OBJET CONTACT ---- */
@@ -128,7 +129,7 @@ const validFirstName = function(inputFirstName) {
     // L'expression régulière à laquelle doit se conformer la valeur du champ
     let feedBackTxt = inputFirstName.nextElementSibling;
 
-    if(firstNameRegex.test(inputFirstName.value)) { // Si la valeur est conforme à l'expression régulière ci-dessus...
+    if(firstNameRegex.test(inputFirstName.value) && stringCheck(inputFirstName.value)) { // Si la valeur est conforme à l'expression régulière ci-dessus...
 
         feedBackTxt.innerText = "Prénom Valide"; // ... un message de validation apparaît,
         contact.firstName = form.firstName.value; // la valeur est stockée dans l'objet "contact",
@@ -150,7 +151,7 @@ const validLastName = function(inputLastName) {
     let lastNameRegex = new RegExp("^((([A-za-zàáâãäåçèéêëìíîïðòóôõöùúûüýÿ']+[\s | -]{1}[A-za-zàáâãäåçèéêëìíîïðòóôõöùúûüýÿ']+)+)|([A-Za-zàáâãäåçèéêëìíîïðòóôõöùúûüýÿ']+))$", "g", "i");
     let feedBackTxt = inputLastName.nextElementSibling;
 
-    if(lastNameRegex.test(inputLastName.value)) {
+    if(lastNameRegex.test(inputLastName.value) && stringCheck(inputLastName.value)) {
 
         feedBackTxt.innerText = "Nom Valide";
         contact.lastName = form.lastName.value;
@@ -172,7 +173,7 @@ const validAddress = function(inputAddress) {
 
     let feedBackTxt = inputAddress.nextElementSibling;
 
-    if(addressRegex.test(inputAddress.value)) {
+    if(addressRegex.test(inputAddress.value) && stringCheck(inputAddress.value)) {
 
         feedBackTxt.innerText = "Adresse Valide";
         contact.address = form.address.value;
@@ -193,7 +194,7 @@ const validCity = function(inputCity) {
     let cityRegex = new RegExp("^((([A-za-zàáâãäåçèéêëìíîïðòóôõöùúûüýÿ']+[\s | -]{1}[A-za-zàáâãäåçèéêëìíîïðòóôõöùúûüýÿ']+)+)|([A-Za-zàáâãäåçèéêëìíîïðòóôõöùúûüýÿ']+))$", "g", "i");
     let feedBackTxt = inputCity.nextElementSibling;
 
-    if(cityRegex.test(inputCity.value)) {
+    if(cityRegex.test(inputCity.value) && stringCheck(inputCity.value)) {
 
         feedBackTxt.innerText = "Ville Valide";
         contact.city = form.city.value;
@@ -214,7 +215,7 @@ const validEmail = function(inputEmail) {
     let mailRegex = new RegExp("^[a-zA-Z0-9.-_]+[@]{1}[a-zA-Z0-9.-_]+[.]{1}[a-z]{2,10}$", "g");
     let feedBackTxt = inputEmail.nextElementSibling;
 
-    if(mailRegex.test(inputEmail.value)) {
+    if(mailRegex.test(inputEmail.value) && stringCheck(inputEmail.value)) {
 
         feedBackTxt.innerText = "Email Valide";
         contact.email = form.email.value;
@@ -234,7 +235,16 @@ const orderButton = document.getElementById("order");
 let formTest = document.querySelector(".cart__order__form");
 formTest.setAttribute("method", "post");
 
+const stringCheck = (elt) => { // FONCTION vérifiant que l'élément est bien une chaîne de caractères
+    if(typeof elt === "string") {
+        return true;
+    } else {
+        return false;
+    }
+};
+
 let products = []; // Création d'un tableau destiné à stocker les ID des produits mis au Panier
+let arrayIdCheck = false;
 
 for(i=0; i< storedProducts.length; i++) {
 
@@ -244,9 +254,17 @@ for(i=0; i< storedProducts.length; i++) {
     products.push(cartArticleId); // Stockage dans le tableau
 }
 
+products.forEach(function(key) {  // VERIFICATION du type (string) des ID du tableau
+    if(stringCheck(key)) {
+        arrayIdCheck = true;
+    } else {
+        console.log("Au moins une des entrées du tableau d'ID 'products' n'est pas une string");
+    }
+})
+
 orderButton.addEventListener("click", function(e){ // Ecoute au clic du bouton "Commander"
 
-    if(firstNameOk && lastNameOk && addressOk && cityOk && mailOk) { // Si tous les booléens des champs du formulaire valent TRUE
+    if(firstNameOk && lastNameOk && addressOk && cityOk && mailOk && arrayIdCheck) { // Si tous les booléens des champs du formulaire valent TRUE
 
         e.preventDefault(); // Empêche le comportement par défaut d'actualisation de page
 
