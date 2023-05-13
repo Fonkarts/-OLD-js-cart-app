@@ -1,4 +1,5 @@
-Un site de e-commerce fictif, réalisé dans le cadre d'un projet OC.
+Projet étudiant.
+Une simple app de commande de canapés avec sélection de produits et affichage de cette sélection dans le panier.
 
 -----------------------
 Procédure serveur local
